@@ -13,7 +13,7 @@
         <Version Condition="'$(BUILD_VERSION)' != ''">$(BUILD_VERSION)</Version>
         <AssemblyName>Soenneker.Instantly.Leads</AssemblyName>
         <PackageId>Soenneker.Instantly.Leads</PackageId>
-        <PackageTags>instantly leads lead http httpclient email marketing instantlyleadutil util csharp dotnet c# .net</PackageTags>
+        <PackageTags>instantly ai instantlyai leads lead email marketing instantlyleadutil util csharp dotnet c# .net</PackageTags>
         <Copyright>Copyright © 2024 Jake Soenneker</Copyright>
         <Authors>Jake Soenneker</Authors>
         <Company>https://soenneker.com</Company>
