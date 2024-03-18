@@ -9,7 +9,6 @@ using Soenneker.Tests.FixturedUnit;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.Extensions.Configuration;
-using Soenneker.Extensions.Configuration;
 using Soenneker.Facts.Local;
 using Soenneker.Instantly.Leads.Responses;
 
@@ -30,17 +29,17 @@ public class InstantlyLeadUtilTests : FixturedUnitTest
     {
         var config = Resolve<IConfiguration>();
 
+        var lead = AutoFaker.Generate<InstantlyLeadRequest>();
+        lead.Email = Faker.Internet.Email();
+
         var request = new InstantlyAddLeadsRequest
         {
-            CampaignId = "c779a6b6-1558-4aae-bba9-fb2c55b720e9",
-            ApiKey = config.GetValueStrict<string>("Instantly:ApiKey"),
+            CampaignId = "89aa44d1-6f25-43af-8640-5a1cc1be1323",
             Leads =
             [
-                AutoFaker.Generate<InstantlyLeadRequest>()
+                lead
             ]
         };
-
-        request.Leads[0].Email = Faker.Internet.Email();
 
         InstantlyAddLeadsResponse? response = await _util.Add(request);
         response!.Status.Should().Be("success");
@@ -51,7 +50,7 @@ public class InstantlyLeadUtilTests : FixturedUnitTest
 
     [LocalFact]
     public async Task Search_should_return_lead()
-    {  
+    {
         List<InstantlySearchLeadResponse>? response = await _util.Search("antonette4@gmail.com");
         response.Should().NotBeNull();
     }

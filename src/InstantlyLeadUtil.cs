@@ -137,9 +137,15 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
 
         string responseMessage = await response.Content.ReadAsStringAsync();
 
-        var responseObj = JsonUtil.Deserialize<List<InstantlySearchLeadResponse>>(responseMessage);
+        if (response.IsSuccessStatusCode)
+        {
+            var responseObj = JsonUtil.Deserialize<List<InstantlySearchLeadResponse>>(responseMessage);
 
-        return responseObj;
+            return responseObj;
+        }
+
+        _logger.LogError("Error searching for lead from Instantly with email ({email}) and campaign ({CampaignId}): {responseMessage}", email, campaignId, responseMessage);
+        return null;
     }
 
     public ValueTask<InstantlyOperationResponse?> DeleteSafe(List<string> emails, bool deleteAllFromCompany = false, string? campaignId = null)

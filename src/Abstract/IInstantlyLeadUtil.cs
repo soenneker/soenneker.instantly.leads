@@ -19,12 +19,16 @@ public interface IInstantlyLeadUtil
     /// <returns>A task that represents the asynchronous operation. The task result contains the response for the add operation, or null if the operation fails.</returns>
     ValueTask<InstantlyAddLeadsResponse?> Add(InstantlyLeadRequest lead, string campaignId);
 
+    ValueTask<InstantlyAddLeadsResponse?> AddSafe(InstantlyLeadRequest lead, string campaignId);
+
     /// <summary>
     /// Adds multiple leads based on the provided request details.
     /// </summary>
     /// <param name="request">The request containing the details for adding multiple leads.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the response for the bulk add operation, or null if the operation fails.</returns>
     ValueTask<InstantlyAddLeadsResponse?> Add(InstantlyAddLeadsRequest request);
+
+    ValueTask<InstantlyAddLeadsResponse?> AddSafe(InstantlyAddLeadsRequest request);
 
     /// <summary>
     /// Searches for leads by email in a safe manner, with optional filtering by campaign ID.
