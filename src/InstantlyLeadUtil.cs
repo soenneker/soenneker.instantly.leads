@@ -91,16 +91,31 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
 
         var content = request.ToHttpContent();
 
-        HttpResponseMessage response = await client.PostAsync(_baseUrl + "lead/add", content);
+        HttpResponseMessage httpResponse = await client.PostAsync(_baseUrl + "lead/add", content);
 
-        string responseMessage = await response.Content.ReadAsStringAsync();
+        string responseMessage = await httpResponse.Content.ReadAsStringAsync();
 
-        var responseObj = JsonUtil.Deserialize<InstantlyAddLeadsResponse>(responseMessage);
+        if (httpResponse.IsSuccessStatusCode)
+        {
+            InstantlyAddLeadsResponse? response = null;
 
-        if (_log)
-            _logger.LogDebug("Added {LeadsUploaded} leads to Instantly campaign ({CampaignId})", responseObj!.LeadsUploaded, request.CampaignId);
+            try
+            {
+                response = JsonUtil.Deserialize<InstantlyAddLeadsResponse>(responseMessage);
 
-        return responseObj;
+                if (_log)
+                    _logger.LogDebug("Added {LeadsUploaded} leads to Instantly campaign ({CampaignId})", response!.LeadsUploaded, request.CampaignId);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Exception deserializing InstantlyAddLeadsResponse with content: {content}", responseMessage);
+            }
+
+            return response;
+        }
+
+        _logger.LogError("Non-success status code ({code}) from Instantly, content: {content}", (int) httpResponse.StatusCode, responseMessage);
+        return null;
     }
 
     public ValueTask<List<InstantlySearchLeadResponse>?> SearchSafe(string email, string? campaignId = null)
@@ -133,18 +148,27 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
             url += $"&campaign_id={campaignId}";
         }
 
-        HttpResponseMessage response = await client.GetAsync(url);
+        HttpResponseMessage httpResponse = await client.GetAsync(url);
 
-        string responseMessage = await response.Content.ReadAsStringAsync();
+        string responseMessage = await httpResponse.Content.ReadAsStringAsync();
 
-        if (response.IsSuccessStatusCode)
+        if (httpResponse.IsSuccessStatusCode)
         {
-            var responseObj = JsonUtil.Deserialize<List<InstantlySearchLeadResponse>>(responseMessage);
+            List<InstantlySearchLeadResponse>? response = null;
 
-            return responseObj;
+            try
+            {
+                response = JsonUtil.Deserialize<List<InstantlySearchLeadResponse>>(responseMessage);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Exception deserializing InstantlySearchLeadResponse with content: {content}", responseMessage);
+            }
+
+            return response;
         }
 
-        _logger.LogError("Error searching for lead from Instantly with email ({email}) and campaign ({CampaignId}): {responseMessage}", email, campaignId, responseMessage);
+        _logger.LogError("Non-success status code ({code}) from Instantly with email ({email}) and campaign ({CampaignId}), content: {content}", (int)httpResponse.StatusCode, email, campaignId, responseMessage);
         return null;
     }
 
