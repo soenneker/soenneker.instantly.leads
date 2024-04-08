@@ -1,10 +1,8 @@
-using System;
 using Microsoft.Extensions.Logging;
 using Soenneker.Instantly.Client.Abstract;
 using Soenneker.Instantly.Leads.Abstract;
 using System.Threading.Tasks;
 using Soenneker.Instantly.Leads.Requests;
-using Soenneker.Utils.Json;
 using System.Net.Http;
 using Soenneker.Instantly.Leads.Responses;
 using Microsoft.Extensions.Configuration;
@@ -64,22 +62,9 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
 
         HttpClient client = await _instantlyClient.Get();
 
-        InstantlyAddLeadsResponse? response = await client.SendWithRetryToType<InstantlyAddLeadsRequest, InstantlyAddLeadsResponse>(HttpMethod.Post, _baseUrl + "lead/add", request);
+        var response = await client.SendWithRetryToType<InstantlyAddLeadsResponse>(HttpMethod.Post, _baseUrl + "lead/add", request);
 
         return response;
-    }
-
-    public ValueTask<List<InstantlySearchLeadResponse>?> SearchSafe(string email, string? campaignId = null)
-    {
-        try
-        {
-            return SearchSafe(email, campaignId);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error searching for lead from Instantly with email ({email}) and campaign ({CampaignId})", email, campaignId);
-            return default;
-        }
     }
 
     public async ValueTask<List<InstantlySearchLeadResponse>?> Search(string email, string? campaignId = null)
@@ -89,8 +74,6 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
         if (_log)
             _logger.LogDebug("Searching for lead from Instantly with email ({email}) and campaign ({CampaignId})...", email, campaignId);
 
-        HttpClient client = await _instantlyClient.Get();
-
         string url = _baseUrl + $"lead/get?api_key={_apiKey}&email={email}";
 
         if (campaignId.Populated())
@@ -99,29 +82,11 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
             url += $"&campaign_id={campaignId}";
         }
 
-        HttpResponseMessage httpResponse = await client.GetAsync(url);
+        HttpClient client = await _instantlyClient.Get();
 
-        string responseMessage = await httpResponse.Content.ReadAsStringAsync();
+        var response = await client.SendToType<List<InstantlySearchLeadResponse>>(url);
 
-        if (httpResponse.IsSuccessStatusCode)
-        {
-            List<InstantlySearchLeadResponse>? response = null;
-
-            try
-            {
-                response = JsonUtil.Deserialize<List<InstantlySearchLeadResponse>>(responseMessage);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Exception deserializing InstantlySearchLeadResponse with content: {content}", responseMessage);
-            }
-
-            return response;
-        }
-
-        _logger.LogError("Non-success status code ({code}) from Instantly with email ({email}) and campaign ({CampaignId}), content: {content}", (int) httpResponse.StatusCode, email, campaignId,
-            responseMessage);
-        return null;
+        return response;
     }
 
     public async ValueTask<InstantlyOperationResponse?> Delete(List<string> emails, bool deleteAllFromCompany = false, string? campaignId = null)
@@ -139,7 +104,7 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
 
         HttpClient client = await _instantlyClient.Get();
 
-        InstantlyOperationResponse? response = await client.SendWithRetryToType<InstantlyDeleteLeadsRequest, InstantlyOperationResponse>(HttpMethod.Post, _baseUrl + "lead/delete", request);
+        var response = await client.SendWithRetryToType<InstantlyOperationResponse>(HttpMethod.Post, _baseUrl + "lead/delete", request);
 
         return response;
     }

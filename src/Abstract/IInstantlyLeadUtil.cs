@@ -27,14 +27,6 @@ public interface IInstantlyLeadUtil
     ValueTask<InstantlyAddLeadsResponse?> Add(InstantlyAddLeadsRequest request);
 
     /// <summary>
-    /// Searches for leads by email in a safe manner, with optional filtering by campaign ID.
-    /// </summary>
-    /// <param name="email">The email address to search for.</param>
-    /// <param name="campaignId">Optional. The unique identifier of the campaign to filter the search. Default is null, searching across all campaigns.</param>
-    /// <returns>A task that represents the asynchronous search operation. The task result contains a list of matching leads, or null if the operation fails.</returns>
-    ValueTask<List<InstantlySearchLeadResponse>?> SearchSafe(string email, string? campaignId = null);
-
-    /// <summary>
     /// Searches for leads by email, with optional filtering by campaign ID.
     /// </summary>
     /// <param name="email">The email address to search for.</param>
