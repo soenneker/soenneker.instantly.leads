@@ -7,7 +7,6 @@ using Soenneker.Instantly.Leads.Requests;
 using Soenneker.Utils.Json;
 using System.Net.Http;
 using Soenneker.Instantly.Leads.Responses;
-using Soenneker.Extensions.Object;
 using Microsoft.Extensions.Configuration;
 using Soenneker.Extensions.Configuration;
 using Soenneker.Extensions.String;
@@ -15,6 +14,7 @@ using Soenneker.Extensions.Enumerable;
 using System.Collections.Generic;
 using Soenneker.Instantly.Leads.Requests.Partials;
 using Soenneker.Extensions.Enumerable.String;
+using Soenneker.Extensions.HttpClient;
 
 namespace Soenneker.Instantly.Leads;
 
@@ -37,18 +37,6 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
         _log = config.GetValue<bool>("Instantly:LogEnabled");
     }
 
-    public ValueTask<InstantlyAddLeadsResponse?> AddSafe(InstantlyLeadRequest lead, string campaignId)
-    {
-        var request = new InstantlyAddLeadsRequest
-        {
-            CampaignId = campaignId,
-            ApiKey = _apiKey,
-            Leads = [lead]
-        };
-
-        return AddSafe(request);
-    }
-
     public async ValueTask<InstantlyAddLeadsResponse?> Add(InstantlyLeadRequest lead, string campaignId)
     {
         var request = new InstantlyAddLeadsRequest
@@ -59,19 +47,6 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
         };
 
         return await Add(request);
-    }
-
-    public ValueTask<InstantlyAddLeadsResponse?> AddSafe(InstantlyAddLeadsRequest request)
-    {
-        try
-        {
-            return Add(request);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding leads to Instantly campaign ({CampaignId})", request.CampaignId);
-            return default;
-        }
     }
 
     public async ValueTask<InstantlyAddLeadsResponse?> Add(InstantlyAddLeadsRequest request)
@@ -89,33 +64,9 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
 
         HttpClient client = await _instantlyClient.Get();
 
-        var content = request.ToHttpContent();
+        InstantlyAddLeadsResponse? response = await client.SendWithRetryToType<InstantlyAddLeadsRequest, InstantlyAddLeadsResponse>(HttpMethod.Post, _baseUrl + "lead/add", request);
 
-        HttpResponseMessage httpResponse = await client.PostAsync(_baseUrl + "lead/add", content);
-
-        string responseMessage = await httpResponse.Content.ReadAsStringAsync();
-
-        if (httpResponse.IsSuccessStatusCode)
-        {
-            InstantlyAddLeadsResponse? response = null;
-
-            try
-            {
-                response = JsonUtil.Deserialize<InstantlyAddLeadsResponse>(responseMessage);
-
-                if (_log)
-                    _logger.LogDebug("Added {LeadsUploaded} leads to Instantly campaign ({CampaignId})", response!.LeadsUploaded, request.CampaignId);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Exception deserializing InstantlyAddLeadsResponse with content: {content}", responseMessage);
-            }
-
-            return response;
-        }
-
-        _logger.LogError("Non-success status code ({code}) from Instantly, content: {content}", (int) httpResponse.StatusCode, responseMessage);
-        return null;
+        return response;
     }
 
     public ValueTask<List<InstantlySearchLeadResponse>?> SearchSafe(string email, string? campaignId = null)
@@ -168,21 +119,9 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
             return response;
         }
 
-        _logger.LogError("Non-success status code ({code}) from Instantly with email ({email}) and campaign ({CampaignId}), content: {content}", (int)httpResponse.StatusCode, email, campaignId, responseMessage);
+        _logger.LogError("Non-success status code ({code}) from Instantly with email ({email}) and campaign ({CampaignId}), content: {content}", (int) httpResponse.StatusCode, email, campaignId,
+            responseMessage);
         return null;
-    }
-
-    public ValueTask<InstantlyOperationResponse?> DeleteSafe(List<string> emails, bool deleteAllFromCompany = false, string? campaignId = null)
-    {
-        try
-        {
-            return Delete(emails, deleteAllFromCompany, campaignId);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting leads from Instantly with emails ({email}) and campaign ({CampaignId})", emails.ToCommaSeparatedString(), campaignId);
-            return default;
-        }
     }
 
     public async ValueTask<InstantlyOperationResponse?> Delete(List<string> emails, bool deleteAllFromCompany = false, string? campaignId = null)
@@ -200,12 +139,8 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
 
         HttpClient client = await _instantlyClient.Get();
 
-        HttpResponseMessage response = await client.PostAsync(_baseUrl + "lead/delete", request.ToHttpContent());
+        InstantlyOperationResponse? response = await client.SendWithRetryToType<InstantlyDeleteLeadsRequest, InstantlyOperationResponse>(HttpMethod.Post, _baseUrl + "lead/delete", request);
 
-        string responseMessage = await response.Content.ReadAsStringAsync();
-
-        var responseObj = JsonUtil.Deserialize<InstantlyOperationResponse>(responseMessage);
-
-        return responseObj;
+        return response;
     }
 }
