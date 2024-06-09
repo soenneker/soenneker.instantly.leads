@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using Soenneker.Instantly.Leads.Requests.Partials;
 using Soenneker.Extensions.Enumerable.String;
 using Soenneker.Extensions.HttpClient;
+using Soenneker.Extensions.ValueTask;
 
 namespace Soenneker.Instantly.Leads;
 
@@ -44,7 +45,7 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
             Leads = [lead]
         };
 
-        return await Add(request);
+        return await Add(request).NoSync();
     }
 
     public async ValueTask<InstantlyAddLeadsResponse?> Add(InstantlyAddLeadsRequest request)
@@ -60,9 +61,9 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
         if (request.ApiKey.IsNullOrEmpty())
             request.ApiKey = _apiKey;
 
-        HttpClient client = await _instantlyClient.Get();
+        HttpClient client = await _instantlyClient.Get().NoSync();
 
-        var response = await client.SendWithRetryToType<InstantlyAddLeadsResponse>(HttpMethod.Post, _baseUrl + "lead/add", request);
+        InstantlyAddLeadsResponse? response = await client.SendWithRetryToType<InstantlyAddLeadsResponse>(HttpMethod.Post, _baseUrl + "lead/add", request).NoSync();
 
         return response;
     }
@@ -82,9 +83,9 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
             url += $"&campaign_id={campaignId}";
         }
 
-        HttpClient client = await _instantlyClient.Get();
+        HttpClient client = await _instantlyClient.Get().NoSync();
 
-        var response = await client.SendToType<List<InstantlySearchLeadResponse>>(url);
+        List<InstantlySearchLeadResponse>? response = await client.SendToType<List<InstantlySearchLeadResponse>>(url).NoSync();
 
         return response;
     }
@@ -102,9 +103,9 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
             CampaignId = campaignId
         };
 
-        HttpClient client = await _instantlyClient.Get();
+        HttpClient client = await _instantlyClient.Get().NoSync();
 
-        var response = await client.SendWithRetryToType<InstantlyOperationResponse>(HttpMethod.Post, _baseUrl + "lead/delete", request);
+        InstantlyOperationResponse? response = await client.SendWithRetryToType<InstantlyOperationResponse>(HttpMethod.Post, _baseUrl + "lead/delete", request).NoSync();
 
         return response;
     }
