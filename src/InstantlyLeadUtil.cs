@@ -10,6 +10,7 @@ using Soenneker.Extensions.Configuration;
 using Soenneker.Extensions.String;
 using Soenneker.Extensions.Enumerable;
 using System.Collections.Generic;
+using System.Threading;
 using Soenneker.Instantly.Leads.Requests.Partials;
 using Soenneker.Extensions.Enumerable.String;
 using Soenneker.Extensions.HttpClient;
@@ -36,7 +37,7 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
         _log = config.GetValue<bool>("Instantly:LogEnabled");
     }
 
-    public async ValueTask<InstantlyAddLeadsResponse?> Add(InstantlyLeadRequest lead, string campaignId)
+    public async ValueTask<InstantlyAddLeadsResponse?> Add(InstantlyLeadRequest lead, string campaignId, CancellationToken cancellationToken = default)
     {
         var request = new InstantlyAddLeadsRequest
         {
@@ -45,10 +46,10 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
             Leads = [lead]
         };
 
-        return await Add(request).NoSync();
+        return await Add(request, cancellationToken).NoSync();
     }
 
-    public async ValueTask<InstantlyAddLeadsResponse?> Add(InstantlyAddLeadsRequest request)
+    public async ValueTask<InstantlyAddLeadsResponse?> Add(InstantlyAddLeadsRequest request, CancellationToken cancellationToken = default)
     {
         foreach (InstantlyLeadRequest lead in request.Leads)
         {
@@ -61,14 +62,14 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
         if (request.ApiKey.IsNullOrEmpty())
             request.ApiKey = _apiKey;
 
-        HttpClient client = await _instantlyClient.Get().NoSync();
+        HttpClient client = await _instantlyClient.Get(cancellationToken).NoSync();
 
-        InstantlyAddLeadsResponse? response = await client.SendWithRetryToType<InstantlyAddLeadsResponse>(HttpMethod.Post, _baseUrl + "lead/add", request).NoSync();
+        InstantlyAddLeadsResponse? response = await client.SendWithRetryToType<InstantlyAddLeadsResponse>(HttpMethod.Post, _baseUrl + "lead/add", request, cancellationToken: cancellationToken).NoSync();
 
         return response;
     }
 
-    public async ValueTask<List<InstantlySearchLeadResponse>?> Search(string email, string? campaignId = null)
+    public async ValueTask<List<InstantlySearchLeadResponse>?> Search(string email, string? campaignId = null, CancellationToken cancellationToken = default)
     {
         email = email.ToLowerInvariantFast();
 
@@ -83,14 +84,14 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
             url += $"&campaign_id={campaignId}";
         }
 
-        HttpClient client = await _instantlyClient.Get().NoSync();
+        HttpClient client = await _instantlyClient.Get(cancellationToken).NoSync();
 
-        List<InstantlySearchLeadResponse>? response = await client.SendToType<List<InstantlySearchLeadResponse>>(url).NoSync();
+        List<InstantlySearchLeadResponse>? response = await client.SendToType<List<InstantlySearchLeadResponse>>(url, cancellationToken: cancellationToken).NoSync();
 
         return response;
     }
 
-    public async ValueTask<InstantlyOperationResponse?> Delete(List<string> emails, bool deleteAllFromCompany = false, string? campaignId = null)
+    public async ValueTask<InstantlyOperationResponse?> Delete(List<string> emails, bool deleteAllFromCompany = false, string? campaignId = null, CancellationToken cancellationToken = default)
     {
         if (_log)
             _logger.LogWarning("Deleting leads from Instantly with emails ({email}) and campaign ({CampaignId})...", emails.ToCommaSeparatedString(), campaignId);
@@ -103,9 +104,9 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
             CampaignId = campaignId
         };
 
-        HttpClient client = await _instantlyClient.Get().NoSync();
+        HttpClient client = await _instantlyClient.Get(cancellationToken).NoSync();
 
-        InstantlyOperationResponse? response = await client.SendWithRetryToType<InstantlyOperationResponse>(HttpMethod.Post, _baseUrl + "lead/delete", request).NoSync();
+        InstantlyOperationResponse? response = await client.SendWithRetryToType<InstantlyOperationResponse>(HttpMethod.Post, _baseUrl + "lead/delete", request, cancellationToken: cancellationToken).NoSync();
 
         return response;
     }
