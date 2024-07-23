@@ -51,7 +51,7 @@ public class InstantlyLeadUtilTests : FixturedUnitTest
     [LocalFact]
     public async Task Search_should_return_lead()
     {
-        List<InstantlySearchLeadResponse>? response = await _util.Search("antonette4@gmail.com");
+        List<InstantlySearchLeadResponse>? response = await _util.Search("blah@blah.com");
         response.Should().NotBeNull();
     }
 }
