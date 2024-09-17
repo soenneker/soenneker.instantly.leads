@@ -33,7 +33,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\src\Soenneker.Instantly.Leads.csproj" />
+        <ProjectReference Include="..\..\src\Soenneker.Instantly.Leads.csproj" />
     </ItemGroup>
 
 </Project>
