@@ -15,7 +15,6 @@ using Soenneker.Instantly.Leads.Requests.Partials;
 using Soenneker.Extensions.Enumerable.String;
 using Soenneker.Extensions.HttpClient;
 using Soenneker.Extensions.ValueTask;
-using Soenneker.Instantly.Client;
 
 namespace Soenneker.Instantly.Leads;
 
@@ -64,7 +63,7 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
 
         HttpClient client = await _instantlyClient.Get(cancellationToken).NoSync();
 
-        InstantlyAddLeadsResponse? response = await client.SendWithRetryToType<InstantlyAddLeadsResponse>(HttpMethod.Post, InstantlyClient.BaseUri + "lead/add", request, cancellationToken: cancellationToken).NoSync();
+        InstantlyAddLeadsResponse? response = await client.SendWithRetryToType<InstantlyAddLeadsResponse>(HttpMethod.Post, "lead/add", request, cancellationToken: cancellationToken).NoSync();
 
         return response;
     }
@@ -76,7 +75,7 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
         if (_log)
             _logger.LogDebug("Searching for lead from Instantly with email ({email}) and campaign ({CampaignId})...", email, campaignId);
 
-        string url = InstantlyClient.BaseUri + $"lead/get?api_key={_apiKey}&email={email}";
+        string url = $"lead/get?api_key={_apiKey}&email={email}";
 
         if (campaignId.Populated())
         {
@@ -106,7 +105,7 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
 
         HttpClient client = await _instantlyClient.Get(cancellationToken).NoSync();
 
-        InstantlyOperationResponse? response = await client.SendWithRetryToType<InstantlyOperationResponse>(HttpMethod.Post, InstantlyClient.BaseUri + "lead/delete", request, cancellationToken: cancellationToken).NoSync();
+        InstantlyOperationResponse? response = await client.SendWithRetryToType<InstantlyOperationResponse>(HttpMethod.Post, "lead/delete", request, cancellationToken: cancellationToken).NoSync();
 
         return response;
     }
