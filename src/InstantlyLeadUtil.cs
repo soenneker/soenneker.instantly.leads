@@ -63,7 +63,7 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
 
         HttpClient client = await _instantlyClient.Get(cancellationToken).NoSync();
 
-        InstantlyAddLeadsResponse? response = await client.SendWithRetryToType<InstantlyAddLeadsResponse>(HttpMethod.Post, "lead/add", request, cancellationToken: cancellationToken).NoSync();
+        InstantlyAddLeadsResponse? response = await client.SendWithRetryToType<InstantlyAddLeadsResponse>(HttpMethod.Post, "lead/add", request, logger: _logger, log: _log, cancellationToken: cancellationToken).NoSync();
 
         return response;
     }
@@ -75,7 +75,7 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
         if (_log)
             _logger.LogDebug("Searching for lead from Instantly with email ({email}) and campaign ({CampaignId})...", email, campaignId);
 
-        string url = $"lead/get?api_key={_apiKey}&email={email}";
+        var url = $"lead/get?api_key={_apiKey}&email={email}";
 
         if (campaignId.Populated())
         {
@@ -85,7 +85,7 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
 
         HttpClient client = await _instantlyClient.Get(cancellationToken).NoSync();
 
-        List<InstantlySearchLeadResponse>? response = await client.SendToType<List<InstantlySearchLeadResponse>>(url, cancellationToken: cancellationToken).NoSync();
+        List<InstantlySearchLeadResponse>? response = await client.SendToType<List<InstantlySearchLeadResponse>>(url, _logger, cancellationToken).NoSync();
 
         return response;
     }
@@ -105,7 +105,7 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
 
         HttpClient client = await _instantlyClient.Get(cancellationToken).NoSync();
 
-        InstantlyOperationResponse? response = await client.SendWithRetryToType<InstantlyOperationResponse>(HttpMethod.Post, "lead/delete", request, cancellationToken: cancellationToken).NoSync();
+        InstantlyOperationResponse? response = await client.SendWithRetryToType<InstantlyOperationResponse>(HttpMethod.Post, "lead/delete", request, logger: _logger, log: _log, cancellationToken: cancellationToken).NoSync();
 
         return response;
     }
