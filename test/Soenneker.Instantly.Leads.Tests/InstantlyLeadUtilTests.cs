@@ -7,7 +7,7 @@ using Soenneker.Instantly.Leads.Requests;
 using Soenneker.Instantly.Leads.Requests.Partials;
 using Soenneker.Tests.FixturedUnit;
 using Xunit;
-using Xunit.Abstractions;
+
 using Microsoft.Extensions.Configuration;
 using Soenneker.Facts.Local;
 using Soenneker.Instantly.Leads.Responses;
