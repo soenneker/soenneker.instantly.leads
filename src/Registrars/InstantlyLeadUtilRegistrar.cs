@@ -13,18 +13,22 @@ public static class InstantlyLeadUtilRegistrar
     /// <summary>
     /// Adds <see cref="IInstantlyLeadUtil"/> as a singleton service. <para/>
     /// </summary>
-    public static void AddInstantlyLeadUtilAsSingleton(this IServiceCollection services)
+    public static IServiceCollection AddInstantlyLeadUtilAsSingleton(this IServiceCollection services)
     {
-        services.AddInstantlyClientAsSingleton();
-        services.TryAddSingleton<IInstantlyLeadUtil, InstantlyLeadUtil>();
+        services.AddInstantlyClientAsSingleton()
+                .TryAddSingleton<IInstantlyLeadUtil, InstantlyLeadUtil>();
+
+        return services;
     }
 
     /// <summary>
     /// Adds <see cref="IInstantlyLeadUtil"/> as a scoped service. <para/>
     /// </summary>
-    public static void AddInstantlyLeadUtilAsScoped(this IServiceCollection services)
+    public static IServiceCollection AddInstantlyLeadUtilAsScoped(this IServiceCollection services)
     {
-        services.AddInstantlyClientAsSingleton();
-        services.TryAddScoped<IInstantlyLeadUtil, InstantlyLeadUtil>();
+        services.AddInstantlyClientAsSingleton()
+                .TryAddScoped<IInstantlyLeadUtil, InstantlyLeadUtil>();
+
+        return services;
     }
 }

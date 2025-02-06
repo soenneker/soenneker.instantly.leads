@@ -63,9 +63,7 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
 
         HttpClient client = await _instantlyClient.Get(cancellationToken).NoSync();
 
-        InstantlyAddLeadsResponse? response = await client.SendWithRetryToType<InstantlyAddLeadsResponse>(HttpMethod.Post, "lead/add", request, logger: _logger, log: _log, cancellationToken: cancellationToken).NoSync();
-
-        return response;
+        return await client.SendWithRetryToType<InstantlyAddLeadsResponse>(HttpMethod.Post, "lead/add", request, logger: _logger, log: _log, cancellationToken: cancellationToken).NoSync();
     }
 
     public async ValueTask<List<InstantlySearchLeadResponse>?> Search(string email, string? campaignId = null, CancellationToken cancellationToken = default)
@@ -85,9 +83,7 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
 
         HttpClient client = await _instantlyClient.Get(cancellationToken).NoSync();
 
-        List<InstantlySearchLeadResponse>? response = await client.SendToType<List<InstantlySearchLeadResponse>>(url, _logger, cancellationToken).NoSync();
-
-        return response;
+        return await client.SendToType<List<InstantlySearchLeadResponse>>(url, _logger, cancellationToken).NoSync();
     }
 
     public async ValueTask<InstantlyOperationResponse?> Delete(List<string> emails, bool deleteAllFromCompany = false, string? campaignId = null, CancellationToken cancellationToken = default)
@@ -105,8 +101,6 @@ public class InstantlyLeadUtil : IInstantlyLeadUtil
 
         HttpClient client = await _instantlyClient.Get(cancellationToken).NoSync();
 
-        InstantlyOperationResponse? response = await client.SendWithRetryToType<InstantlyOperationResponse>(HttpMethod.Post, "lead/delete", request, logger: _logger, log: _log, cancellationToken: cancellationToken).NoSync();
-
-        return response;
+        return await client.SendWithRetryToType<InstantlyOperationResponse>(HttpMethod.Post, "lead/delete", request, logger: _logger, log: _log, cancellationToken: cancellationToken).NoSync();
     }
 }
