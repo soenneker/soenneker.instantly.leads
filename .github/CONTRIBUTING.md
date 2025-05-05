@@ -1,4 +1,4 @@
-# Contributing to Soenneker.Instantly.Leads
+﻿# Contributing to Soenneker.Instantly.Leads
 
 We're excited that you're interested in contributing!
 
