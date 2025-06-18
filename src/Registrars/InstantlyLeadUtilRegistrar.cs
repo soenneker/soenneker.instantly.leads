@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Soenneker.Instantly.Client.Registrars;
+using Soenneker.Instantly.ClientUtil.Registrars;
 using Soenneker.Instantly.Leads.Abstract;
 
 namespace Soenneker.Instantly.Leads.Registrars;
@@ -15,7 +16,7 @@ public static class InstantlyLeadUtilRegistrar
     /// </summary>
     public static IServiceCollection AddInstantlyLeadUtilAsSingleton(this IServiceCollection services)
     {
-        services.AddInstantlyClientAsSingleton()
+        services.AddInstantlyOpenApiClientUtilAsSingleton()
                 .TryAddSingleton<IInstantlyLeadUtil, InstantlyLeadUtil>();
 
         return services;
@@ -26,7 +27,7 @@ public static class InstantlyLeadUtilRegistrar
     /// </summary>
     public static IServiceCollection AddInstantlyLeadUtilAsScoped(this IServiceCollection services)
     {
-        services.AddInstantlyClientAsSingleton()
+        services.AddInstantlyOpenApiClientUtilAsScoped()
                 .TryAddScoped<IInstantlyLeadUtil, InstantlyLeadUtil>();
 
         return services;

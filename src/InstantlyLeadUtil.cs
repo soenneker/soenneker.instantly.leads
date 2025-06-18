@@ -1,106 +1,134 @@
 using Microsoft.Extensions.Logging;
-using Soenneker.Instantly.Client.Abstract;
 using Soenneker.Instantly.Leads.Abstract;
 using System.Threading.Tasks;
-using Soenneker.Instantly.Leads.Requests;
-using System.Net.Http;
-using Soenneker.Instantly.Leads.Responses;
-using Microsoft.Extensions.Configuration;
-using Soenneker.Extensions.Configuration;
-using Soenneker.Extensions.String;
-using Soenneker.Extensions.Enumerable;
-using System.Collections.Generic;
 using System.Threading;
-using Soenneker.Instantly.Leads.Requests.Partials;
-using Soenneker.Extensions.Enumerable.String;
-using Soenneker.Extensions.HttpClient;
+using Microsoft.Extensions.Configuration;
+using Soenneker.Extensions.String;
+using System.Collections.Generic;
 using Soenneker.Extensions.ValueTask;
+using Soenneker.Instantly.ClientUtil.Abstract;
+using Soenneker.Instantly.OpenApiClient;
+using Soenneker.Instantly.OpenApiClient.Api.V2.Leads;
+using System;
+using Soenneker.Instantly.OpenApiClient.Models;
+using Soenneker.Extensions.Task;
+using System.Linq;
+using Soenneker.Instantly.OpenApiClient.Api.V2.Leads.List;
 
 namespace Soenneker.Instantly.Leads;
 
 /// <inheritdoc cref="IInstantlyLeadUtil"/>
-public class InstantlyLeadUtil : IInstantlyLeadUtil
+public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
 {
-    private readonly IInstantlyClient _instantlyClient;
+    private readonly IInstantlyOpenApiClientUtil _instantlyClient;
     private readonly ILogger<InstantlyLeadUtil> _logger;
 
-    private readonly string _apiKey;
     private readonly bool _log;
 
-    public InstantlyLeadUtil(IInstantlyClient instantlyClient, ILogger<InstantlyLeadUtil> logger, IConfiguration config)
+    public InstantlyLeadUtil(IInstantlyOpenApiClientUtil instantlyClient, ILogger<InstantlyLeadUtil> logger, IConfiguration config)
     {
         _instantlyClient = instantlyClient;
         _logger = logger;
 
-        _apiKey = config.GetValueStrict<string>("Instantly:ApiKey");
         _log = config.GetValue<bool>("Instantly:LogEnabled");
     }
 
-    public async ValueTask<InstantlyAddLeadsResponse?> Add(InstantlyLeadRequest lead, string campaignId, CancellationToken cancellationToken = default)
+    public async ValueTask<Def11?> Add(LeadsPostRequestBody lead, string campaignId, CancellationToken cancellationToken = default)
     {
-        var request = new InstantlyAddLeadsRequest
-        {
-            CampaignId = campaignId,
-            ApiKey = _apiKey,
-            Leads = [lead]
-        };
-
-        return await Add(request, cancellationToken).NoSync();
-    }
-
-    public async ValueTask<InstantlyAddLeadsResponse?> Add(InstantlyAddLeadsRequest request, CancellationToken cancellationToken = default)
-    {
-        foreach (InstantlyLeadRequest lead in request.Leads)
-        {
-            lead.Email = lead.Email.ToLowerInvariantFast();
-        }
+        lead.Campaign = Guid.Parse(campaignId);
+        lead.Email = lead.Email?.ToLowerInvariantFast();
 
         if (_log)
-            _logger.LogDebug("Adding leads ({emails}) to Instantly campaign ({CampaignId})...", request.Leads.ToCommaSeparatedString(), request.CampaignId);
+            _logger.LogDebug("Adding lead ({email}) to Instantly campaign ({CampaignId})...", lead.Email, campaignId);
 
-        if (request.ApiKey.IsNullOrEmpty())
-            request.ApiKey = _apiKey;
+        InstantlyOpenApiClient client = await _instantlyClient.Get(cancellationToken).NoSync();
 
-        HttpClient client = await _instantlyClient.Get(cancellationToken).NoSync();
-
-        return await client.SendWithRetryToType<InstantlyAddLeadsResponse>(HttpMethod.Post, "lead/add", request, logger: _logger, log: _log, cancellationToken: cancellationToken).NoSync();
+        return await client.Api.V2.Leads.PostAsync(lead, config => { }, cancellationToken).NoSync();
     }
 
-    public async ValueTask<List<InstantlySearchLeadResponse>?> Search(string email, string? campaignId = null, CancellationToken cancellationToken = default)
+    public async ValueTask<Def11?> Add(LeadsPostRequestBody request, CancellationToken cancellationToken = default)
+    {
+        request.Email = request.Email?.ToLowerInvariantFast();
+
+        if (_log)
+            _logger.LogDebug("Adding lead ({email}) to Instantly campaign ({CampaignId})...", request.Email, request.Campaign);
+
+        InstantlyOpenApiClient client = await _instantlyClient.Get(cancellationToken).NoSync();
+
+        return await client.Api.V2.Leads.PostAsync(request, config => { }, cancellationToken).NoSync();
+    }
+
+    public async ValueTask<Def11?> GetByEmail(string email, string? campaignId = null, CancellationToken cancellationToken = default)
+    {
+        email = email.ToLowerInvariantFast();
+
+        if (_log)
+            _logger.LogDebug("Getting lead from Instantly with email ({email}) and campaign ({CampaignId})...", email, campaignId);
+
+        InstantlyOpenApiClient client = await _instantlyClient.Get(cancellationToken).NoSync();
+
+        var requestBody = new ListPostRequestBody
+        {
+            Contacts = [email],
+            Limit = 1
+        };
+        if (campaignId != null)
+            requestBody.Campaign = Guid.Parse(campaignId);
+
+        ListPostResponse? response = await client.Api.V2.Leads.List.PostAsListPostResponseAsync(requestBody, config => { }, cancellationToken).NoSync();
+
+        return response?.Items?.FirstOrDefault();
+    }
+
+    public async ValueTask<List<Def11>?> Search(string email, string? campaignId = null, CancellationToken cancellationToken = default)
     {
         email = email.ToLowerInvariantFast();
 
         if (_log)
             _logger.LogDebug("Searching for lead from Instantly with email ({email}) and campaign ({CampaignId})...", email, campaignId);
 
-        var url = $"lead/get?api_key={_apiKey}&email={email}";
+        InstantlyOpenApiClient client = await _instantlyClient.Get(cancellationToken).NoSync();
 
-        if (campaignId.Populated())
+        var requestBody = new ListPostRequestBody
         {
-            campaignId = campaignId.ToLowerInvariantFast();
-            url += $"&campaign_id={campaignId}";
-        }
+            Contacts = [email]
+        };
+        if (campaignId != null)
+            requestBody.Campaign = Guid.Parse(campaignId);
 
-        HttpClient client = await _instantlyClient.Get(cancellationToken).NoSync();
+        ListPostResponse? response = await client.Api.V2.Leads.List.PostAsListPostResponseAsync(requestBody, config => { }, cancellationToken).NoSync();
 
-        return await client.SendToType<List<InstantlySearchLeadResponse>>(url, _logger, cancellationToken).NoSync();
+        return response?.Items;
     }
 
-    public async ValueTask<InstantlyOperationResponse?> Delete(List<string> emails, bool deleteAllFromCompany = false, string? campaignId = null, CancellationToken cancellationToken = default)
+    public async ValueTask<Def11?> Delete(List<string> emails, string? campaignId = null, CancellationToken cancellationToken = default)
     {
         if (_log)
-            _logger.LogWarning("Deleting leads from Instantly with emails ({email}) and campaign ({CampaignId})...", emails.ToCommaSeparatedString(), campaignId);
+            _logger.LogWarning("Deleting leads from Instantly with emails ({emails}) and campaign ({CampaignId})...", string.Join(", ", emails), campaignId);
 
-        var request = new InstantlyDeleteLeadsRequest
+        InstantlyOpenApiClient client = await _instantlyClient.Get(cancellationToken).NoSync();
+
+        var requestBody = new ListPostRequestBody
         {
-            ApiKey = _apiKey,
-            DeleteList = emails,
-            DeleteAllFromCompany = deleteAllFromCompany,
-            CampaignId = campaignId
+            Contacts = emails
         };
 
-        HttpClient client = await _instantlyClient.Get(cancellationToken).NoSync();
+        if (campaignId != null)
+            requestBody.Campaign = Guid.Parse(campaignId);
 
-        return await client.SendWithRetryToType<InstantlyOperationResponse>(HttpMethod.Post, "lead/delete", request, logger: _logger, log: _log, cancellationToken: cancellationToken).NoSync();
+        ListPostResponse? response = await client.Api.V2.Leads.List.PostAsListPostResponseAsync(requestBody, config => { }, cancellationToken).NoSync();
+
+        if (response?.Items == null || !response.Items.Any())
+            return null;
+
+        foreach (Def11 lead in response.Items)
+        {
+            if (lead.Id == null)
+                continue;
+
+            await client.Api.V2.Leads[lead.Id.ToString()].DeleteAsync(null, config => { }, cancellationToken).NoSync();
+        }
+
+        return response.Items.FirstOrDefault();
     }
 }
