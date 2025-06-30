@@ -1,5 +1,10 @@
+using System.Collections.Generic;
+using AwesomeAssertions;
+using Soenneker.Facts.Local;
 using Soenneker.Instantly.Leads.Abstract;
 using Soenneker.Tests.FixturedUnit;
+using System.Threading.Tasks;
+using Soenneker.Instantly.OpenApiClient.Models;
 using Xunit;
 
 namespace Soenneker.Instantly.Leads.Tests;
@@ -17,6 +22,12 @@ public class InstantlyLeadUtilTests : FixturedUnitTest
     [Fact]
     public void Default()
     {
+    }
 
+    [LocalFact]
+    public async ValueTask Search()
+    {
+        List<Def11>? result = await _util.Search("", null, CancellationToken);
+        result.Should().NotBeNullOrEmpty();
     }
 }

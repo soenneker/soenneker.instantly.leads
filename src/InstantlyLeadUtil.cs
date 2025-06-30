@@ -126,7 +126,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
             if (lead.Id == null)
                 continue;
 
-            await client.Api.V2.Leads[lead.Id.ToString()].DeleteAsync(null, config => { }, cancellationToken).NoSync();
+            await client.Api.V2.Leads[lead.Id.Value].DeleteAsync(null, config => { }, cancellationToken).NoSync();
         }
 
         return response.Items.FirstOrDefault();
