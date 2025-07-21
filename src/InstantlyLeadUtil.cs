@@ -72,6 +72,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
             Contacts = [email],
             Limit = 1
         };
+
         if (campaignId != null)
             requestBody.Campaign = Guid.Parse(campaignId);
 
@@ -93,6 +94,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
         {
             Contacts = [email]
         };
+
         if (campaignId != null)
             requestBody.Campaign = Guid.Parse(campaignId);
 
