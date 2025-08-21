@@ -15,8 +15,7 @@ public static class InstantlyLeadUtilRegistrar
     /// </summary>
     public static IServiceCollection AddInstantlyLeadUtilAsSingleton(this IServiceCollection services)
     {
-        services.AddInstantlyOpenApiClientUtilAsSingleton()
-                .TryAddSingleton<IInstantlyLeadUtil, InstantlyLeadUtil>();
+        services.AddInstantlyOpenApiClientUtilAsSingleton().TryAddSingleton<IInstantlyLeadUtil, InstantlyLeadUtil>();
 
         return services;
     }
@@ -26,8 +25,7 @@ public static class InstantlyLeadUtilRegistrar
     /// </summary>
     public static IServiceCollection AddInstantlyLeadUtilAsScoped(this IServiceCollection services)
     {
-        services.AddInstantlyOpenApiClientUtilAsSingleton()
-                .TryAddScoped<IInstantlyLeadUtil, InstantlyLeadUtil>();
+        services.AddInstantlyOpenApiClientUtilAsSingleton().TryAddScoped<IInstantlyLeadUtil, InstantlyLeadUtil>();
 
         return services;
     }

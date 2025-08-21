@@ -76,7 +76,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
         if (campaignId != null)
             requestBody.Campaign = Guid.Parse(campaignId);
 
-        ListPostResponse? response = await client.Api.V2.Leads.List.PostAsListPostResponseAsync(requestBody, config => { }, cancellationToken).NoSync();
+        ListPostResponse? response = await client.Api.V2.Leads.List.PostAsync(requestBody, config => { }, cancellationToken).NoSync();
 
         return response?.Items?.FirstOrDefault();
     }
@@ -98,7 +98,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
         if (campaignId != null)
             requestBody.Campaign = Guid.Parse(campaignId);
 
-        ListPostResponse? response = await client.Api.V2.Leads.List.PostAsListPostResponseAsync(requestBody, config => { }, cancellationToken).NoSync();
+        ListPostResponse? response = await client.Api.V2.Leads.List.PostAsync(requestBody, config => { }, cancellationToken).NoSync();
 
         return response?.Items;
     }
@@ -118,7 +118,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
         if (campaignId != null)
             requestBody.Campaign = Guid.Parse(campaignId);
 
-        ListPostResponse? response = await client.Api.V2.Leads.List.PostAsListPostResponseAsync(requestBody, config => { }, cancellationToken).NoSync();
+        ListPostResponse? response = await client.Api.V2.Leads.List.PostAsync(requestBody, config => { }, cancellationToken).NoSync();
 
         if (response?.Items == null || !response.Items.Any())
             return null;
