@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using AwesomeAssertions;
-using Soenneker.Facts.Local;
 using Soenneker.Instantly.Leads.Abstract;
 using Soenneker.Tests.FixturedUnit;
 using System.Threading.Tasks;
+using Soenneker.Facts.Manual;
 using Soenneker.Instantly.OpenApiClient.Models;
 using Xunit;
 
@@ -24,7 +24,8 @@ public class InstantlyLeadUtilTests : FixturedUnitTest
     {
     }
 
-    [LocalFact]
+    [ManualFact]
+    //[LocalFact]
     public async ValueTask Search()
     {
         List<Def11>? result = await _util.Search("", null, CancellationToken);
