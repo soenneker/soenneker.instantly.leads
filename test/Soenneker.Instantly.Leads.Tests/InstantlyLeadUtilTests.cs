@@ -3,7 +3,6 @@ using AwesomeAssertions;
 using Soenneker.Instantly.Leads.Abstract;
 using Soenneker.Tests.HostedUnit;
 using System.Threading.Tasks;
-using Soenneker.Facts.Manual;
 using Soenneker.Instantly.OpenApiClient.Models;
 
 namespace Soenneker.Instantly.Leads.Tests;
@@ -23,7 +22,7 @@ public class InstantlyLeadUtilTests : HostedUnitTest
     {
     }
 
-    [ManualFact]
+    [Skip("Manual")]
     //[LocalOnly]
     public async ValueTask Search()
     {
