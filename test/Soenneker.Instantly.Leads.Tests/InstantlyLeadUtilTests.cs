@@ -1,31 +1,30 @@
 using System.Collections.Generic;
 using AwesomeAssertions;
 using Soenneker.Instantly.Leads.Abstract;
-using Soenneker.Tests.FixturedUnit;
+using Soenneker.Tests.HostedUnit;
 using System.Threading.Tasks;
 using Soenneker.Facts.Manual;
 using Soenneker.Instantly.OpenApiClient.Models;
-using Xunit;
 
 namespace Soenneker.Instantly.Leads.Tests;
 
-[Collection("Collection")]
-public class InstantlyLeadUtilTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public class InstantlyLeadUtilTests : HostedUnitTest
 {
     private readonly IInstantlyLeadUtil _util;
 
-    public InstantlyLeadUtilTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public InstantlyLeadUtilTests(Host host) : base(host)
     {
         _util = Resolve<IInstantlyLeadUtil>(true);
     }
 
-    [Fact]
+    [Test]
     public void Default()
     {
     }
 
     [ManualFact]
-    //[LocalFact]
+    //[LocalOnly]
     public async ValueTask Search()
     {
         List<Def11>? result = await _util.Search("", null, CancellationToken);
