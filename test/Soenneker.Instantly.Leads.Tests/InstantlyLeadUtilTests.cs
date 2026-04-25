@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using AwesomeAssertions;
 using Soenneker.Instantly.Leads.Abstract;
 using Soenneker.Tests.HostedUnit;
@@ -24,9 +25,9 @@ public class InstantlyLeadUtilTests : HostedUnitTest
 
     [Skip("Manual")]
     //[LocalOnly]
-    public async ValueTask Search()
+    public async ValueTask Search(CancellationToken cancellationToken)
     {
-        List<Def11>? result = await _util.Search("", null, CancellationToken);
+        List<Def11>? result = await _util.Search("", null, cancellationToken);
         result.Should().NotBeNullOrEmpty();
     }
 }
