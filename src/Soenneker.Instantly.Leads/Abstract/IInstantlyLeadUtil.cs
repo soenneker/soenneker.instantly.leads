@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
-using Soenneker.Instantly.OpenApiClient.Api.V2.Leads;
 using Soenneker.Instantly.OpenApiClient.Models;
 
 namespace Soenneker.Instantly.Leads.Abstract;
@@ -18,7 +17,7 @@ public interface IInstantlyLeadUtil
     /// <param name="campaignId">The unique identifier of the campaign to which the lead will be added.</param>
     /// <param name="cancellationToken"></param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the response for the add operation, or null if the operation fails.</returns>
-    ValueTask<Def11?> Add(LeadsPostRequestBody lead, string campaignId, CancellationToken cancellationToken = default);
+    ValueTask<Def11?> Add(CreateLead lead, string campaignId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds multiple leads based on the provided request details.
@@ -26,7 +25,7 @@ public interface IInstantlyLeadUtil
     /// <param name="request">The request containing the details for adding multiple leads.</param>
     /// <param name="cancellationToken"></param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the response for the bulk add operation, or null if the operation fails.</returns>
-    ValueTask<Def11?> Add(LeadsPostRequestBody request, CancellationToken cancellationToken = default);
+    ValueTask<Def11?> Add(CreateLead request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Searches for leads by email, with optional filtering by campaign ID.
