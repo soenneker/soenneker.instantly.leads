@@ -13,7 +13,6 @@ using System;
 using Soenneker.Instantly.OpenApiClient.Models;
 using Soenneker.Extensions.Task;
 using System.Linq;
-using Soenneker.Instantly.OpenApiClient.Api.V2.Leads.List;
 
 namespace Soenneker.Instantly.Leads;
 
@@ -33,7 +32,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
         _log = config.GetValue<bool>("Instantly:LogEnabled");
     }
 
-    public async ValueTask<Def11?> Add(CreateLead lead, string campaignId, CancellationToken cancellationToken = default)
+    public async ValueTask<Lead?> Add(CreateLeadRequest lead, string campaignId, CancellationToken cancellationToken = default)
     {
         lead.Campaign = Guid.Parse(campaignId);
         lead.Email = lead.Email?.ToLowerInvariantFast();
@@ -46,7 +45,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
         return await client.Api.V2.Leads.PostAsync(lead, config => { }, cancellationToken).NoSync();
     }
 
-    public async ValueTask<Def11?> Add(CreateLead request, CancellationToken cancellationToken = default)
+    public async ValueTask<Lead?> Add(CreateLeadRequest request, CancellationToken cancellationToken = default)
     {
         request.Email = request.Email?.ToLowerInvariantFast();
 
@@ -58,7 +57,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
         return await client.Api.V2.Leads.PostAsync(request, config => { }, cancellationToken).NoSync();
     }
 
-    public async ValueTask<Def11?> GetByEmail(string email, string? campaignId = null, CancellationToken cancellationToken = default)
+    public async ValueTask<Lead?> GetByEmail(string email, string? campaignId = null, CancellationToken cancellationToken = default)
     {
         email = email.ToLowerInvariantFast();
 
@@ -67,7 +66,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
 
         InstantlyOpenApiClient client = await _instantlyClient.Get(cancellationToken).NoSync();
 
-        var requestBody = new ListLeads
+        var requestBody = new ListLeadsRequest
         {
             Contacts = [email],
             Limit = 1
@@ -76,12 +75,12 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
         if (campaignId != null)
             requestBody.Campaign = Guid.Parse(campaignId);
 
-        ListPostResponse? response = await client.Api.V2.Leads.List.PostAsync(requestBody, config => { }, cancellationToken).NoSync();
+        ListLeads200Response? response = await client.Api.V2.Leads.List.PostAsync(requestBody, config => { }, cancellationToken).NoSync();
 
         return response?.Items?.FirstOrDefault();
     }
 
-    public async ValueTask<List<Def11>?> Search(string email, string? campaignId = null, CancellationToken cancellationToken = default)
+    public async ValueTask<List<Lead>?> Search(string email, string? campaignId = null, CancellationToken cancellationToken = default)
     {
         email = email.ToLowerInvariantFast();
 
@@ -90,7 +89,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
 
         InstantlyOpenApiClient client = await _instantlyClient.Get(cancellationToken).NoSync();
 
-        var requestBody = new ListLeads
+        var requestBody = new ListLeadsRequest
         {
             Contacts = [email]
         };
@@ -98,19 +97,19 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
         if (campaignId != null)
             requestBody.Campaign = Guid.Parse(campaignId);
 
-        ListPostResponse? response = await client.Api.V2.Leads.List.PostAsync(requestBody, config => { }, cancellationToken).NoSync();
+        ListLeads200Response? response = await client.Api.V2.Leads.List.PostAsync(requestBody, config => { }, cancellationToken).NoSync();
 
         return response?.Items;
     }
 
-    public async ValueTask<Def11?> Delete(List<string> emails, string? campaignId = null, CancellationToken cancellationToken = default)
+    public async ValueTask<Lead?> Delete(List<string> emails, string? campaignId = null, CancellationToken cancellationToken = default)
     {
         if (_log)
             _logger.LogWarning("Deleting leads from Instantly with emails ({emails}) and campaign ({CampaignId})...", string.Join(", ", emails), campaignId);
 
         InstantlyOpenApiClient client = await _instantlyClient.Get(cancellationToken).NoSync();
 
-        var requestBody = new ListLeads
+        var requestBody = new ListLeadsRequest
         {
             Contacts = emails
         };
@@ -118,12 +117,12 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
         if (campaignId != null)
             requestBody.Campaign = Guid.Parse(campaignId);
 
-        ListPostResponse? response = await client.Api.V2.Leads.List.PostAsync(requestBody, config => { }, cancellationToken).NoSync();
+        ListLeads200Response? response = await client.Api.V2.Leads.List.PostAsync(requestBody, config => { }, cancellationToken).NoSync();
 
         if (response?.Items == null || !response.Items.Any())
             return null;
 
-        foreach (Def11 lead in response.Items)
+        foreach (Lead lead in response.Items)
         {
             if (lead.Id == null)
                 continue;

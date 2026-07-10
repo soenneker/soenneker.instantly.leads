@@ -27,7 +27,7 @@ public class InstantlyLeadUtilTests : HostedUnitTest
     //[LocalOnly]
     public async ValueTask Search(CancellationToken cancellationToken)
     {
-        List<Def11>? result = await _util.Search("", null, cancellationToken);
+        List<Lead>? result = await _util.Search("", null, cancellationToken);
         result.Should().NotBeNullOrEmpty();
     }
 }
