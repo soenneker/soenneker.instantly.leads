@@ -9,7 +9,6 @@ using Soenneker.Extensions.ValueTask;
 using Soenneker.Instantly.ClientUtil.Abstract;
 using Soenneker.Instantly.OpenApiClient;
 using Soenneker.Instantly.OpenApiClient.Api.V2.Leads;
-using System;
 using Soenneker.Instantly.OpenApiClient.Models;
 using Soenneker.Extensions.Task;
 using System.Linq;
@@ -34,7 +33,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
 
     public async ValueTask<Lead?> Add(CreateLeadRequest lead, string campaignId, CancellationToken cancellationToken = default)
     {
-        lead.Campaign = Guid.Parse(campaignId);
+        lead.Campaign = campaignId;
         lead.Email = lead.Email?.ToLowerInvariantFast();
 
         if (_log)
@@ -73,7 +72,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
         };
 
         if (campaignId != null)
-            requestBody.Campaign = Guid.Parse(campaignId);
+            requestBody.Campaign = campaignId;
 
         ListLeads200Response? response = await client.Api.V2.Leads.List.PostAsync(requestBody, config => { }, cancellationToken).NoSync();
 
@@ -95,7 +94,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
         };
 
         if (campaignId != null)
-            requestBody.Campaign = Guid.Parse(campaignId);
+            requestBody.Campaign = campaignId;
 
         ListLeads200Response? response = await client.Api.V2.Leads.List.PostAsync(requestBody, config => { }, cancellationToken).NoSync();
 
@@ -115,7 +114,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
         };
 
         if (campaignId != null)
-            requestBody.Campaign = Guid.Parse(campaignId);
+            requestBody.Campaign = campaignId;
 
         ListLeads200Response? response = await client.Api.V2.Leads.List.PostAsync(requestBody, config => { }, cancellationToken).NoSync();
 
@@ -127,7 +126,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
             if (lead.Id == null)
                 continue;
 
-            await client.Api.V2.Leads[lead.Id.Value].DeleteAsync(null, config => { }, cancellationToken).NoSync();
+            await client.Api.V2.Leads[lead.Id].DeleteAsync(null, config => { }, cancellationToken).NoSync();
         }
 
         return response.Items.FirstOrDefault();
