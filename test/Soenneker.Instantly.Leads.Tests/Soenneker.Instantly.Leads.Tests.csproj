@@ -27,7 +27,7 @@
         <PackageReference Include="TUnit" Version="1.64.6" />
 =======
         <PackageReference Include="Soenneker.Utils.Test" Version="4.0.324" />
-        <PackageReference Include="Soenneker.Tests.HostedUnit" Version="4.0.197" />
+        <PackageReference Include="Soenneker.Tests.HostedUnit" Version="4.0.198" />
         <PackageReference Include="TUnit" Version="1.65.0" />
 >>>>>>> 3ac020fceb26eb5781c968685111c956eb7d27e7
     </ItemGroup>
