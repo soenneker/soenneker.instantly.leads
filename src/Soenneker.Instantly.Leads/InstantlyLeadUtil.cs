@@ -15,7 +15,6 @@ using System.Linq;
 
 namespace Soenneker.Instantly.Leads;
 
-/// <inheritdoc cref="IInstantlyLeadUtil"/>
 public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
 {
     private readonly IInstantlyOpenApiClientUtil _instantlyClient;

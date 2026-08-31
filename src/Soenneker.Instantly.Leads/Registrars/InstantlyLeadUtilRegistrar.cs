@@ -6,7 +6,7 @@ using Soenneker.Instantly.Leads.Abstract;
 namespace Soenneker.Instantly.Leads.Registrars;
 
 /// <summary>
-/// A .NET typesafe implementation of Instantly's Lead API
+/// Registers Instantly lead operations.
 /// </summary>
 public static class InstantlyLeadUtilRegistrar
 {
