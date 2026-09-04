@@ -23,7 +23,7 @@ public class InstantlyLeadUtilTests : HostedUnitTest
     {
     }
 
-    [Skip("Manual")]
+    [Test, Skip("Manual")]
     //[LocalOnly]
     public async ValueTask Search(CancellationToken cancellationToken)
     {
