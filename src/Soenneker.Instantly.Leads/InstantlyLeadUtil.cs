@@ -11,7 +11,6 @@ using Soenneker.Instantly.OpenApiClient;
 using Soenneker.Instantly.OpenApiClient.Api.V2.Leads;
 using Soenneker.Instantly.OpenApiClient.Models;
 using Soenneker.Extensions.Task;
-using System.Linq;
 
 namespace Soenneker.Instantly.Leads;
 
@@ -76,7 +75,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
 
         ListLeads200Response? response = await client.Api.V2.Leads.List.PostAsync(requestBody, config => { }, cancellationToken).NoSync();
 
-        return response?.Items?.FirstOrDefault();
+        return response?.Items is { Count: > 0 } items ? items[0] : null;
     }
 
     public async ValueTask<List<Lead>?> Search(string email, string? campaignId = null, CancellationToken cancellationToken = default)
@@ -118,7 +117,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
 
         ListLeads200Response? response = await client.Api.V2.Leads.List.PostAsync(requestBody, config => { }, cancellationToken).NoSync();
 
-        if (response?.Items == null || !response.Items.Any())
+        if (response?.Items is not { Count: > 0 })
             return null;
 
         foreach (Lead lead in response.Items)
@@ -129,6 +128,6 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
             await client.Api.V2.Leads[lead.Id].DeleteAsync(config => { }, cancellationToken).NoSync();
         }
 
-        return response.Items.FirstOrDefault();
+        return response.Items[0];
     }
 }
