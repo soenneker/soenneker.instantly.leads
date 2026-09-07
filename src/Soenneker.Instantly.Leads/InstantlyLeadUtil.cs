@@ -102,7 +102,7 @@ public sealed class InstantlyLeadUtil : IInstantlyLeadUtil
 
     public async ValueTask<Lead?> Delete(List<string> emails, string? campaignId = null, CancellationToken cancellationToken = default)
     {
-        if (_log)
+        if (_log && _logger.IsEnabled(LogLevel.Warning))
             _logger.LogWarning("Deleting leads from Instantly with emails ({emails}) and campaign ({CampaignId})...", string.Join(", ", emails), campaignId);
 
         InstantlyOpenApiClient client = await _instantlyClient.Get(cancellationToken).NoSync();
